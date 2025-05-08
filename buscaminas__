@@ -1,4 +1,164 @@
-main():
-print("hola mundo")
-main()
-djdjdjdjdddddfdfdfd
+def tablero_1(filas, columnas):
+    contenido = [
+		["-", "-", "-", "BOMBA", "-", "-"],
+		["BOMBA", "-", "-", "-", "-", "-"],
+		["-", "-", "-", "-", "-", "-"],
+		["-", "-", "-", "-", "BOMBA", "-"],
+        ["BOMBA", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-"]
+	]
+    random.shuffle(contenido)
+    tablero_oculto = []
+    for fila in range(filas):
+        fila_tablero = []
+        for columna in range(columnas):
+            fila_tablero.append(contenido[fila][columna])
+        tablero_oculto.append(fila_tablero)
+    tablero_visible = [["?" for i in range(0, filas)] for i in range(0, columnas)]
+    return tablero_visible, tablero_oculto
+
+def tablero_2(filas, columnas):
+    contenido = [
+		["-", "-", "-", "BOMBA", "-", "-", "-", "-"],
+		["BOMBA", "-", "-", "-", "-", "-", "-", "-"],
+		["-", "-", "-", "-", "-", "-", "-", "BOMBA"],
+		["-", "-", "-", "-", "BOMBA", "-", "-", "-"],
+        ["BOMBA", "-", "-", "-", "-", "-", "BOMBA", "-"],
+        ["-", "-", "-", "-", "BOMBA", "-", "-", "-"],
+        ["-", "-", "BOMBA", "-", "-", "-", "-", "-"],
+        ["-", "-", "BOMBA", "-", "-", "-", "-", "-"]
+	]
+    random.shuffle(contenido)
+    tablero_oculto = []
+    for fila in range(filas):
+        fila_tablero = []
+        for columna in range(columnas):
+            fila_tablero.append(contenido[fila][columna])
+        tablero_oculto.append(fila_tablero)
+    tablero_visible = [["?" for i in range(0, filas)] for i in range(0, columnas)]
+    return tablero_visible, tablero_oculto
+
+def tablero_3(filas, columnas):
+    contenido = [
+		["-", "-", "-", "BOMBA", "-", "BOMBA", "-", "-", "-", "-"],
+		["-", "-", "-", "-", "-", "-", "-", "-", "BOMBA", "-"],
+		["-", "-", "-", "BOMBA", "-", "-", "-", "-", "-", "-"],
+		["BOMBA", "-", "-", "-", "-", "-", "BOMBA", "-", "-", "-"],
+        ["-", "-", "-", "BOMBA", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "BOMBA", "-", "-", "-", "-"],
+        ["BOMBA", "-", "-", "BOMBA", "-", "-", "-", "BOMBA", "-", "-"],
+        ["-", "-", "-", "BOMBA", "-", "-", "-", "-", "-", "-"],
+        ["BOMBA", "-", "-", "-", "-", "-", "BOMBA", "-", "-", "-"],
+        ["-", "-", "-", "BOMBA", "-", "-", "-", "-", "-", "-"],
+	]
+    random.shuffle(contenido)
+    tablero_oculto = []
+    for fila in range(filas):
+        fila_tablero = []
+        for columna in range(columnas):
+            fila_tablero.append(contenido[fila][columna])
+        tablero_oculto.append(fila_tablero)
+    tablero_visible = [["?" for i in range(0, filas)] for i in range(0, columnas)]
+    return tablero_visible, tablero_oculto
+
+def imprimir_matriz(matriz):
+    for fila in matriz:
+        for valor in fila:
+            print(valor, end=" ")
+        print(" ")
+
+def contar_minas_alrededor(tablero, fila_j, columna_j, filas, columnas):
+    if tablero[fila_j][columna_j] == "BOMBA":
+        return "BOMBA"
+    contador = 0
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            if 0 <= fila_j + i < filas and 0 <= columna_j + j < columnas:
+                if tablero[fila_j + i][columna_j + j] == "BOMBA":
+                    contador += 1
+    return str(contador) if contador > 0 else "0"
+
+
+def niveles():
+    print("1. EASY (ESTE NIVEL CONSTA DE 4 BOMBAS A TRAVES DE UN TABLERO 6X6)")
+    print("2. MEDIUM (ESTE NIVEL CONSTA DE 9 BOMBAS A TRAVES DE UN TABLERO 8X8)")
+    print("3. EXPERT (ESTE NIVEL CONSTA DE 15 BOMBAS A TRAVES DE UN TABLERO 10X10)")
+
+def contar_segura(tablero_oculto):
+	total_seguras = 0
+	for fila in tablero_oculto:
+		for elemento in fila:
+			if elemento != "BOMBA":
+				total_seguras += 1
+	return total_seguras
+
+def check(tablero_visible):
+	descubiertas = 0
+	for fila in tablero_visible:
+		for elemento in fila:
+			if elemento == "CHECK":
+				descubiertas += 1
+	return descubiertas
+
+def casilla(tablero_oculto, tablero_visible, fila_j, columna_j, filas, columnas):
+    casilla = contar_minas_alrededor(tablero_oculto, fila_j, columna_j, filas, columnas)
+    tablero_visible[fila_j][columna_j] = casilla
+    return tablero_visible
+
+def juego(usuario):
+    niveles()
+    opcion = int(input("ingrese el nivel que se desea jugar: "))
+    if opcion == 1:
+        tablero_visible, tablero_oculto = tablero_1(6, 6)
+        activo = True
+        while activo:
+            imprimir(tablero_visible)
+            fila = int(input("INGRESE EL NUMERO DE LA FILA: "))
+            columna = int(input("INGRESE EL NUMERO DE LA COLUMNA: "))
+
+            if tablero_oculto[fila][columna] == "BOMBA":
+                print("ELEGISTE UNA BOMBA")
+                activo = False
+            elif tablero_visible[fila][columna] == "CHECK":
+                print("ESA CASILLA YA FUE DESCUBIERTA")
+            else:
+                tablero_visible[fila][columna] = "CHECK"
+                if check(tablero_oculto) == total_seguras:
+                    print("GANASTE!")
+                    activo = False
+    elif opcion == 2:
+        tablero_visible, tablero_oculto = tablero_1(8, 8)
+        activo = True
+        while activo:
+            imprimir(tablero_visible)
+            fila = int(input("INGRESE EL NUMERO DE LA FILA: "))
+            columna = int(input("INGRESE EL NUMERO DE LA COLUMNA: "))
+            if tablero_oculto[fila][columna] == "BOMBA":
+                print("ELEGISTE UNA BOMBA")
+                activo = False
+            elif tablero_visible[fila][columna] == "CHECK":
+                print("ESA CASILLA YA FUE DESCUBIERTA")
+            else:
+                tablero_visible[fila][columna] = "CHECK"
+                if check(tablero_oculto) == total_seguras:
+                    print("GANASTE!")
+                    activo = False
+    elif opcion == 3:
+        tablero_visible, tablero_oculto = tablero_1(10, 10)
+        activo = True
+        while activo:
+            imprimir(tablero_visible)
+            fila = int(input("INGRESE EL NUMERO DE LA FILA: "))
+            columna = int(input("INGRESE EL NUMERO DE LA COLUMNA: "))
+            if tablero_oculto[fila][columna] == "BOMBA":
+                print("ELEGISTE UNA BOMBA")
+                activo = False
+            elif tablero_visible[fila][columna] == "CHECK":
+                print("ESA CASILLA YA FUE DESCUBIERTA")
+            else:
+                tablero_visible[fila][columna] = "CHECK"
+                if check(tablero_oculto) == total_seguras:
+                    print("GANASTE!")
+                    activo = False
+    else:
+        print("ingrese una opcion valida")
