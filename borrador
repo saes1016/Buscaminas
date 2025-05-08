@@ -1,0 +1,357 @@
+import random
+import time
+from datetime import datetime
+
+# Variables globales
+usuarios = []  # Lista para almacenar los usuarios
+puntajes = []  # Lista para almacenar los puntajes
+
+# Función para registrar un nuevo usuario
+def registrar_usuario():
+    print("\n=== REGISTRO DE USUARIO ===")
+    nombre = input("Ingrese su nombre: ")
+    correo = input("Ingrese su correo: ")
+    id_usuario = str(random.randint(1000, 9999))
+    
+    nuevo_usuario = {
+        "nombre_usuario": nombre,
+        "correo_usuario": correo,
+        "id_usuario": id_usuario
+    }
+    
+    usuarios.append(nuevo_usuario)
+    print(f"\nUsuario registrado con éxito!")
+    print(f"Su ID de usuario es: {id_usuario}")
+    return nuevo_usuario
+
+# Función para buscar un usuario por ID
+def buscar_usuario():
+    print("\n=== BUSCAR USUARIO ===")
+    id_buscar = input("Ingrese el ID del usuario: ")
+    
+    for usuario in usuarios:
+        if usuario["id_usuario"] == id_buscar:
+            print(f"Usuario encontrado: {usuario['nombre_usuario']} ({usuario['correo_usuario']})")
+            return usuario
+    
+    print("Usuario no encontrado. Por favor regístrese primero.")
+    return None
+
+# Función para inicializar el tablero
+def inicializar_tablero(filas, columnas):
+    return [[" " for _ in range(columnas)] for _ in range(filas)]
+
+# Función para colocar minas en el tablero
+def colocar_minas(tablero, filas, columnas, num_minas):
+    minas_colocadas = 0
+    while minas_colocadas < num_minas:
+        fila = random.randint(0, filas - 1)
+        columna = random.randint(0, columnas - 1)
+        
+        if tablero[fila][columna] != "M":
+            tablero[fila][columna] = "M"
+            minas_colocadas += 1
+    
+    return tablero
+
+# Función para contar minas alrededor de una celda
+def contar_minas_alrededor(tablero, fila, columna, filas, columnas):
+    if tablero[fila][columna] == "M":
+        return "M"
+    
+    contador = 0
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            if 0 <= fila + i < filas and 0 <= columna + j < columnas:
+                if tablero[fila + i][columna + j] == "M":
+                    contador += 1
+    
+    return str(contador) if contador > 0 else " "
+
+# Función para mostrar el tablero al jugador (ocultando las minas)
+def mostrar_tablero(tablero, tablero_visible, filas, columnas):
+    print("\n    " + " ".join(str(i) for i in range(columnas)))
+    print("   " + "-" * (2 * columnas + 1))
+    
+    for i in range(filas):
+        print(f"{i} | " + " ".join(tablero_visible[i]) + " |")
+    
+    print("   " + "-" * (2 * columnas + 1))
+
+# Función para revelar una celda
+def revelar_celda(tablero, tablero_visible, fila, columna, filas, columnas):
+    if tablero_visible[fila][columna] != "-":
+        return False, 0  # Celda ya revelada
+    
+    if tablero[fila][columna] == "M":
+        tablero_visible[fila][columna] = "X"  # Mostrar mina explotada
+        return True, 0  # Juego terminado
+    
+    # Calcular número de minas alrededor
+    valor = contar_minas_alrededor(tablero, fila, columna, filas, columnas)
+    tablero_visible[fila][columna] = valor
+    return False, 1  # Celda revelada con éxito, suma 1 punto
+
+# Función para verificar si el juego está ganado
+def verificar_victoria(tablero, tablero_visible, filas, columnas, num_minas):
+    celdas_ocultas = 0
+    for i in range(filas):
+        for j in range(columnas):
+            if tablero_visible[i][j] == "-":
+                celdas_ocultas += 1
+    
+    return celdas_ocultas == num_minas
+
+# Función para jugar
+def jugar(usuario):
+    print("\n=== NUEVO JUEGO DE BUSCAMINAS ===")
+    print("Seleccione el nivel de dificultad:")
+    print("1. Easy (Tablero 6x6, 4 minas)")
+    print("2. Medium (Tablero 8x8, 9 minas)")
+    print("3. Expert (Tablero 10x10, 15 minas)")
+    
+    opcion = input("Elija una opción (1-3): ")
+    
+    if opcion == "1":
+        filas, columnas, num_minas = 6, 6, 4
+        nivel = "Easy"
+    elif opcion == "2":
+        filas, columnas, num_minas = 8, 8, 9
+        nivel = "Medium"
+    elif opcion == "3":
+        filas, columnas, num_minas = 10, 10, 15
+        nivel = "Expert"
+    else:
+        print("Opción no válida. Seleccionando nivel Easy por defecto.")
+        filas, columnas, num_minas = 6, 6, 4
+        nivel = "Easy"
+    
+    # Inicializar tableros
+    tablero = inicializar_tablero(filas, columnas)
+    tablero_visible = [["- " for _ in range(columnas)] for _ in range(filas)]
+    
+    # Colocar las minas
+    tablero = colocar_minas(tablero, filas, columnas, num_minas)
+    
+    # Jugar
+    juego_terminado = False
+    puntaje = 0
+    celdas_jugadas = []
+    tiempo_inicio = time.time()
+    
+    while not juego_terminado:
+        mostrar_tablero(tablero, tablero_visible, filas, columnas)
+        print(f"Puntaje actual: {puntaje}")
+        
+        try:
+            fila = int(input("Ingrese la fila: "))
+            columna = int(input("Ingrese la columna: "))
+            
+            if not (0 <= fila < filas and 0 <= columna < columnas):
+                print("Coordenadas fuera del tablero. Intente de nuevo.")
+                continue
+            
+            if (fila, columna) in celdas_jugadas:
+                print("Esta celda ya fue seleccionada. Intente otra.")
+                continue
+            
+            celdas_jugadas.append((fila, columna))
+            
+            juego_terminado, puntos = revelar_celda(tablero, tablero_visible, fila, columna, filas, columnas)
+            puntaje += puntos
+            
+            if juego_terminado:
+                mostrar_tablero(tablero, tablero_visible, filas, columnas)
+                print("\n¡BOOM! Has encontrado una mina. Juego terminado.")
+                ganado = False
+                break
+            
+            if verificar_victoria(tablero, tablero_visible, filas, columnas, num_minas):
+                mostrar_tablero(tablero, tablero_visible, filas, columnas)
+                print("\n¡FELICIDADES! Has ganado el juego.")
+                puntaje += 10  # Puntos extra por ganar
+                ganado = True
+                juego_terminado = True
+        
+        except ValueError:
+            print("Por favor ingrese números válidos.")
+    
+    tiempo_total = round(time.time() - tiempo_inicio, 2)
+    
+    # Registrar el puntaje
+    resultado = "Ganada" if ganado else "Perdida"
+    
+    nuevo_puntaje = {
+        "nombre_usuario": usuario["nombre_usuario"],
+        "puntaje": puntaje,
+        "nivel": nivel,
+        "resultado": resultado,
+        "tiempo": tiempo_total,
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    # Actualizar puntaje si ya existe para ese usuario y nivel
+    actualizado = False
+    for i, p in enumerate(puntajes):
+        if p["nombre_usuario"] == usuario["nombre_usuario"] and p["nivel"] == nivel:
+            # Solo actualiza si el puntaje es mayor o si el anterior no era ganada y esta sí
+            if p["puntaje"] < puntaje or (p["resultado"] != "Ganada" and resultado == "Ganada"):
+                puntajes[i] = nuevo_puntaje
+                actualizado = True
+                break
+    
+    if not actualizado:
+        puntajes.append(nuevo_puntaje)
+    
+    print(f"\nTiempo de juego: {tiempo_total} segundos")
+    print(f"Puntaje final: {puntaje}")
+    
+    return
+
+# Función para mostrar el usuario con mayor puntaje por nivel
+def mostrar_mejor_puntaje():
+    print("\n=== MEJORES PUNTAJES ===")
+    print("Seleccione el nivel:")
+    print("1. Easy")
+    print("2. Medium")
+    print("3. Expert")
+    
+    opcion = input("Elija una opción (1-3): ")
+    
+    if opcion == "1":
+        nivel = "Easy"
+    elif opcion == "2":
+        nivel = "Medium"
+    elif opcion == "3":
+        nivel = "Expert"
+    else:
+        print("Opción no válida.")
+        return
+    
+    # Filtrar puntajes por nivel y partidas ganadas
+    puntajes_nivel = [p for p in puntajes if p["nivel"] == nivel and p["resultado"] == "Ganada"]
+    
+    if not puntajes_nivel:
+        print(f"No hay registros de partidas ganadas en el nivel {nivel}.")
+        return
+    
+    # Encontrar el mejor puntaje
+    mejor_puntaje = max(puntajes_nivel, key=lambda x: x["puntaje"])
+    
+    # Buscar el correo del usuario
+    correo = ""
+    for usuario in usuarios:
+        if usuario["nombre_usuario"] == mejor_puntaje["nombre_usuario"]:
+            correo = usuario["correo_usuario"]
+            break
+    
+    print("\nMEJOR JUGADOR:")
+    print(f"Usuario: {mejor_puntaje['nombre_usuario']}")
+    print(f"Correo: {correo}")
+    print(f"Nivel: {mejor_puntaje['nivel']}")
+    print(f"Puntaje: {mejor_puntaje['puntaje']}")
+    print(f"Tiempo: {mejor_puntaje['tiempo']} segundos")
+
+# Función para mostrar las partidas de un usuario
+def mostrar_partidas_usuario():
+    print("\n=== PARTIDAS DE USUARIO ===")
+    id_buscar = input("Ingrese el ID del usuario: ")
+    
+    usuario_encontrado = None
+    for usuario in usuarios:
+        if usuario["id_usuario"] == id_buscar:
+            usuario_encontrado = usuario
+            break
+    
+    if not usuario_encontrado:
+        print("Usuario no encontrado.")
+        return
+    
+    # Filtrar partidas del usuario
+    partidas_usuario = [p for p in puntajes if p["nombre_usuario"] == usuario_encontrado["nombre_usuario"]]
+    
+    if not partidas_usuario:
+        print(f"No hay partidas registradas para {usuario_encontrado['nombre_usuario']}.")
+        return
+    
+    print(f"\nPartidas de {usuario_encontrado['nombre_usuario']}:")
+    print("-" * 70)
+    print(f"{'Nivel':<10} {'Resultado':<10} {'Puntaje':<10} {'Tiempo':<10} {'Fecha':<20}")
+    print("-" * 70)
+    
+    for partida in partidas_usuario:
+        print(f"{partida['nivel']:<10} {partida['resultado']:<10} {partida['puntaje']:<10} {partida['tiempo']:<10} {partida['fecha']:<20}")
+
+# Función para mostrar el top 3 de partidas ganadas en nivel Expert por tiempo
+def mostrar_top_expert():
+    print("\n=== TOP 3 PARTIDAS NIVEL EXPERT ===")
+    
+    # Filtrar partidas de nivel Expert y ganadas
+    partidas_expert = [p for p in puntajes if p["nivel"] == "Expert" and p["resultado"] == "Ganada"]
+    
+    if len(partidas_expert) == 0:
+        print("No hay partidas ganadas en nivel Expert.")
+        return
+    
+    # Ordenar por tiempo (ascendente)
+    partidas_expert.sort(key=lambda x: x["tiempo"])
+    
+    # Mostrar top 3 (o menos si no hay suficientes)
+    top = min(3, len(partidas_expert))
+    
+    print(f"\nTop {top} mejores tiempos en nivel Expert:")
+    print("-" * 70)
+    print(f"{'Posición':<10} {'Usuario':<15} {'Puntaje':<10} {'Tiempo':<10} {'Fecha':<20}")
+    print("-" * 70)
+    
+    for i in range(top):
+        print(f"{i+1:<10} {partidas_expert[i]['nombre_usuario']:<15} {partidas_expert[i]['puntaje']:<10} {partidas_expert[i]['tiempo']:<10} {partidas_expert[i]['fecha']:<20}")
+
+# Función principal
+def main():
+    print("¡Bienvenido al juego de Buscaminas!")
+    
+    while True:
+        print("\n=== MENÚ PRINCIPAL ===")
+        print("1. Registrar nuevo usuario")
+        print("2. Iniciar juego")
+        print("3. Ver mejor puntaje por nivel")
+        print("4. Ver partidas de un usuario")
+        print("5. Ver top 3 de partidas nivel Expert")
+        print("6. Salir")
+        
+        opcion = input("\nSeleccione una opción (1-6): ")
+        
+        if opcion == "1":
+            registrar_usuario()
+        elif opcion == "2":
+            if not usuarios:
+                print("No hay usuarios registrados. Por favor regístrese primero.")
+                continue
+            
+            usuario = buscar_usuario()
+            if usuario:
+                jugar(usuario)
+        elif opcion == "3":
+            if not puntajes:
+                print("No hay puntajes registrados aún.")
+                continue
+            mostrar_mejor_puntaje()
+        elif opcion == "4":
+            if not usuarios or not puntajes:
+                print("No hay usuarios o partidas registradas aún.")
+                continue
+            mostrar_partidas_usuario()
+        elif opcion == "5":
+            if not puntajes:
+                print("No hay puntajes registrados aún.")
+                continue
+            mostrar_top_expert()
+        elif opcion == "6":
+            print("¡Gracias por jugar Buscaminas! Hasta pronto.")
+            break
+        else:
+            print("Opción no válida. Intente de nuevo.")
+
+if __name__ == "__main__":
+    main()
