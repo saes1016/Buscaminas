@@ -1,3 +1,4 @@
+import random
 def tablero_1(filas, columnas):
     contenido = [
 		["-", "-", "-", "BOMBA", "-", "-"],
@@ -162,3 +163,12 @@ def juego(usuario):
                     activo = False
     else:
         print("ingrese una opcion valida")
+usuarios = []
+def registro_usuario():
+    nombre = input("CUAL ES SU NOMBRE? ")
+    correo = input("DIGITE SU CORREO POR FAVOR: ")
+    id_usuario = random.randint(100000, 999999)
+    usuario = [nombre, correo, id_usuario]
+    usuarios.append(usuario)
+    print("USUARIO REGISTRADO EXITOSAMENTE!")
+    return usuario
