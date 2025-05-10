@@ -1,4 +1,9 @@
 import random
+import time
+
+usuarios = []
+puntajes = []
+
 def tablero_1(filas, columnas):
     contenido = [
 		["-", "-", "-", "BOMBA", "-", "-"],
@@ -93,77 +98,53 @@ def contar_segura(tablero_oculto):
 				total_seguras += 1
 	return total_seguras
 
-def check(tablero_visible):
-	descubiertas = 0
-	for fila in tablero_visible:
-		for elemento in fila:
-			if elemento == "CHECK":
+def check(tablero_visible, tablero_oculto, fila_j, columna_j, filas, columnas):
+    descubiertas = 0
+    resultado = contar_minas_alrededor(tablero_oculto, fila_j, columna_j, filas, columnas)
+    for fila in tablero_visible:
+        for elemento in fila:
+			if elemento == resultado:
 				descubiertas += 1
 	return descubiertas
 
-def casilla(tablero_oculto, tablero_visible, fila_j, columna_j, filas, columnas):
-    casilla = contar_minas_alrededor(tablero_oculto, fila_j, columna_j, filas, columnas)
-    tablero_visible[fila_j][columna_j] = casilla
-    return tablero_visible
 
 def juego(usuario):
     niveles()
     opcion = int(input("ingrese el nivel que se desea jugar: "))
     if opcion == 1:
         tablero_visible, tablero_oculto = tablero_1(6, 6)
-        activo = True
-        while activo:
-            imprimir(tablero_visible)
-            fila = int(input("INGRESE EL NUMERO DE LA FILA: "))
-            columna = int(input("INGRESE EL NUMERO DE LA COLUMNA: "))
-
-            if tablero_oculto[fila][columna] == "BOMBA":
-                print("ELEGISTE UNA BOMBA")
-                activo = False
-            elif tablero_visible[fila][columna] == "CHECK":
-                print("ESA CASILLA YA FUE DESCUBIERTA")
-            else:
-                tablero_visible[fila][columna] = "CHECK"
-                if check(tablero_oculto) == total_seguras:
-                    print("GANASTE!")
-                    activo = False
     elif opcion == 2:
-        tablero_visible, tablero_oculto = tablero_1(8, 8)
-        activo = True
-        while activo:
-            imprimir(tablero_visible)
-            fila = int(input("INGRESE EL NUMERO DE LA FILA: "))
-            columna = int(input("INGRESE EL NUMERO DE LA COLUMNA: "))
-            if tablero_oculto[fila][columna] == "BOMBA":
-                print("ELEGISTE UNA BOMBA")
-                activo = False
-            elif tablero_visible[fila][columna] == "CHECK":
-                print("ESA CASILLA YA FUE DESCUBIERTA")
-            else:
-                tablero_visible[fila][columna] = "CHECK"
-                if check(tablero_oculto) == total_seguras:
-                    print("GANASTE!")
-                    activo = False
+        tablero_visible, tablero_oculto = tablero_2(8, 8)
     elif opcion == 3:
-        tablero_visible, tablero_oculto = tablero_1(10, 10)
-        activo = True
-        while activo:
-            imprimir(tablero_visible)
-            fila = int(input("INGRESE EL NUMERO DE LA FILA: "))
-            columna = int(input("INGRESE EL NUMERO DE LA COLUMNA: "))
-            if tablero_oculto[fila][columna] == "BOMBA":
-                print("ELEGISTE UNA BOMBA")
-                activo = False
-            elif tablero_visible[fila][columna] == "CHECK":
-                print("ESA CASILLA YA FUE DESCUBIERTA")
-            else:
-                tablero_visible[fila][columna] = "CHECK"
-                if check(tablero_oculto) == total_seguras:
-                    print("GANASTE!")
-                    activo = False
+        tablero_visible, tablero_oculto = tablero_3(10, 10)
     else:
         print("ingrese una opcion valida")
-usuarios = []
+
+    activo = True
+    while activo:
+        imprimir(tablero_visible)
+        fila = int(input("INGRESE EL NUMERO DE LA FILA: "))
+        columna = int(input("INGRESE EL NUMERO DE LA COLUMNA: "))
+        total_seguras = contar_segura(tablero_oculto)
+
+        if fila < 0 or fila >= filas or columna < 0 or columna >= columnas:
+            print("coordenadas fuera del limite")
+        else:
+            if tablero_oculto[fila][columna] == "BOMBA":
+                print("ELEGISTE UNA BOMBA")
+                activo = False
+            elif tablero_visible[fila][columna] != "?":
+                print("ESA CASILLA YA FUE DESCUBIERTA")
+            else:
+                resultado = contar_minas_alrededor(tablero, fila_j, columna_j, filas, columnas)
+                tablero_visible[fila][columna] = resultado
+                imprimir_matriz(tablero_visible)
+                if check(tablero_visible, tablero_oculto, fila_j, columna_j, filas, columnas) == total_seguras:
+                    print("GANASTE!")
+                    activo = False
+
+
+
 def registro_usuario():
     nombre = input("CUAL ES SU NOMBRE? ")
     correo = input("DIGITE SU CORREO POR FAVOR: ")
