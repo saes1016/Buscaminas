@@ -2,7 +2,7 @@ import random
 import time
 
 usuarios = []
-puntajes = []
+partida = []
 
 def tablero_1(filas, columnas):
     contenido = [
@@ -113,13 +113,19 @@ def juego(usuario):
     opcion = int(input("ingrese el nivel que se desea jugar: "))
     if opcion == 1:
         tablero_visible, tablero_oculto = tablero_1(6, 6)
+        nivel = "easy"
     elif opcion == 2:
         tablero_visible, tablero_oculto = tablero_2(8, 8)
+        nivel = "medium"
     elif opcion == 3:
         tablero_visible, tablero_oculto = tablero_3(10, 10)
+        nivel = "expert"
     else:
         print("ingrese una opcion valida")
 
+    puntaje = 0
+    tiempo_inicial = time.time()
+    ganado = False
     activo = True
     while activo:
         imprimir(tablero_visible)
@@ -129,20 +135,38 @@ def juego(usuario):
 
         if fila < 0 or fila >= filas or columna < 0 or columna >= columnas:
             print("coordenadas fuera del limite")
+
         else:
             if tablero_oculto[fila][columna] == "BOMBA":
                 print("ELEGISTE UNA BOMBA")
+                ganado = False
                 activo = False
             elif tablero_visible[fila][columna] != "?":
                 print("ESA CASILLA YA FUE DESCUBIERTA")
             else:
                 resultado = contar_minas_alrededor(tablero, fila_j, columna_j, filas, columnas)
                 tablero_visible[fila][columna] = resultado
+                puntaje += 1
                 imprimir_matriz(tablero_visible)
                 if check(tablero_visible, tablero_oculto, fila_j, columna_j, filas, columnas) == total_seguras:
                     print("GANASTE!")
+                    puntaje += 10
+                    ganado = True
                     activo = False
 
+    tiempo_fin = time.time()
+    tiempo_total = tiempo_fin - tiempo_inicial
+    print("tiempo trascurrido durante la partida: ", tiempo_total, "segundos")
+
+    resultado_partida = "Ganada" if ganado else "Perdida"
+
+    partida.append(usuario, puntaje, nivel, tiempo_total, resultado_partida)
+
+def mostrar_mejor_puntaje():
+
+def mostrar_partidas_usuario():
+
+def mostrar_top_expert():
 
 
 def registro_usuario():
