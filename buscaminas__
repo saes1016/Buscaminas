@@ -91,21 +91,21 @@ def niveles():
     print("3. EXPERT (ESTE NIVEL CONSTA DE 15 BOMBAS A TRAVES DE UN TABLERO 10X10)")
 
 def contar_segura(tablero_oculto):
-	total_seguras = 0
-	for fila in tablero_oculto:
-		for elemento in fila:
-			if elemento != "BOMBA":
-				total_seguras += 1
-	return total_seguras
+    total_seguras = 0
+    for fila in tablero_oculto:
+        for elemento in fila:
+            if elemento != "BOMBA":
+                total_seguras += 1
+    return total_seguras
 
 def check(tablero_visible, tablero_oculto, fila_j, columna_j, filas, columnas):
     descubiertas = 0
     resultado = contar_minas_alrededor(tablero_oculto, fila_j, columna_j, filas, columnas)
     for fila in tablero_visible:
         for elemento in fila:
-			if elemento == resultado:
-				descubiertas += 1
-	return descubiertas
+            if elemento == resultado:
+                descubiertas += 1
+    return descubiertas
 
 
 def juego(usuario):
